@@ -5,15 +5,16 @@
       <el-radio-button label="en-us">English</el-radio-button>
     </el-radio-group>
     <el-button :style="{ marginLeft: '10px' }" @click="handleSaveSchema">保存</el-button>
-    <el-button @click="handleSaveSchema">发布</el-button>
+    <el-button @click="handleSaveAsNewSchema">另存为</el-button>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue'
-import { loadInitialSchema, saveSchema } from '../service'
+import { loadInitialSchema, saveSchema, saveAsNewSchema } from '../service/schema-parse'
 import { GlobalRegistry } from '@designable/core'
 import { useDesigner, useTree } from '@formily/element-plus-prototypes'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 function useI18n() {
   const language = ref(
@@ -45,7 +46,21 @@ export default defineComponent({
       saveSchema(designerRef.value)
     }
 
-    return { ...useI18n(), handleSaveSchema }
+    function handleSaveAsNewSchema() {
+      ElMessageBox.prompt('模版名字', '另存为', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel'
+      }).then(({ value }) => {
+          return saveAsNewSchema(designerRef.value, value)
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '取消',
+        })
+      })
+    }
+    return { ...useI18n(), handleSaveSchema, handleSaveAsNewSchema }
   },
 })
 </script>
